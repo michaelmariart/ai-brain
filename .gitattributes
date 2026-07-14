@@ -1,0 +1,15 @@
+# Normalise line endings per file type so scripts run on every OS.
+
+# Shell scripts MUST stay LF - CRLF breaks the shebang on macOS/Linux.
+*.sh   text eol=lf
+
+# Windows scripts stay CRLF.
+*.ps1  text eol=crlf
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Treat these as binary (never touch line endings).
+*.woff2 binary
+*.png   binary
+*.jpg   binary
+*.ico   binary

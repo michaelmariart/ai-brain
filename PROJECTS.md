@@ -8,25 +8,49 @@ AI Brain repo. Each project gets its own subfolder:
 AI Brain/
 ├── projects/                       ← your work lives here (NOT tracked by Git)
 │   ├── efp-services-holding-page/  ← a project that lives in the workspace
-│   └── mariart  ->  C:\…\plugins\  ← a project linked in from elsewhere on the PC
-├── Set-ProjectsFolder.ps1          ← tool: where the whole workspace lives
-├── Set-Project.ps1                 ← tool: where each individual project lives
+│   └── mariart  ->  …/plugins/…    ← a project linked in from elsewhere
+├── Set-ProjectsFolder.ps1          ← Windows: where the whole workspace lives
+├── Set-Project.ps1                 ← Windows: where each individual project lives
+├── set-projects-folder.sh          ← macOS/Linux: same as Set-ProjectsFolder.ps1
+├── set-project.sh                  ← macOS/Linux: same as Set-Project.ps1
 ├── PROJECTS.md                     ← this file
+├── .gitattributes                  ← keeps the .sh scripts LF so they run on macOS
 └── .gitignore                      ← contains the line `projects/`
 ```
 
 There are two levels of control:
 
-- **`Set-ProjectsFolder.ps1`** — moves the *entire* `projects/` folder somewhere else.
-- **`Set-Project.ps1`** — lets each *individual* project live anywhere on the PC, linked
-  in under `projects/<name>`. Projects don't have to be centralised in one place.
+- **the folder tool** (`Set-ProjectsFolder.ps1` / `set-projects-folder.sh`) — moves the
+  *entire* `projects/` folder somewhere else.
+- **the project tool** (`Set-Project.ps1` / `set-project.sh`) — lets each *individual*
+  project live anywhere on the machine, linked in under `projects/<name>`. Projects don't
+  have to be centralised in one place.
+
+### Windows and macOS / Linux
+
+The same tools exist for both platforms and behave identically — Windows uses PowerShell
+and *directory junctions*; macOS/Linux use shell scripts and *symbolic links*. Neither
+needs administrator rights.
+
+| Action | Windows (PowerShell) | macOS / Linux (Terminal) |
+|---|---|---|
+| List projects | `.\Set-Project.ps1` | `./set-project.sh` |
+| Link a folder in | `.\Set-Project.ps1 -Name x -Path "…"` | `./set-project.sh --name x --path "…"` |
+| Move a project out | `.\Set-Project.ps1 -Name x -Path "…"` | `./set-project.sh --name x --path "…"` |
+| Unlink a project | `.\Set-Project.ps1 -Name x -Unlink` | `./set-project.sh --name x --unlink` |
+| Relocate whole workspace | `.\Set-ProjectsFolder.ps1 -Path "…"` | `./set-projects-folder.sh --path "…"` |
+| Show workspace location | `.\Set-ProjectsFolder.ps1 -Status` | `./set-projects-folder.sh --status` |
+
+> On macOS/Linux the scripts may need to be made executable once: `chmod +x *.sh`
+> (then run them as `./set-project.sh`). The examples below use PowerShell; swap in the
+> matching command from the table above.
 
 ## Where the files physically live
 
 By default `projects/` is a normal folder inside this repo. But it can point to **any
-location on this PC** — another drive, or a folder outside OneDrive — while you still
-open everything through `.\projects\`. This is done with a Windows *directory junction*
-(no administrator rights needed).
+location on this machine** — another drive, or a folder outside OneDrive — while you still
+open everything through `projects/`. This is done with a Windows *directory junction*
+(or a *symbolic link* on macOS/Linux) — no administrator rights needed.
 
 ### Move the workspace somewhere else
 Open PowerShell in this folder and run:
