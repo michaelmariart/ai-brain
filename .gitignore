@@ -1,3 +1,6 @@
 # Add in the files that we need to ignore
 #
 # These are local configuration files, local skills and agents as well as anything that should not be made public (keys, encryption, etc).
+# Local projects workspace - not tracked; may physically live anywhere on this PC
+projects/
+
