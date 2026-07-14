@@ -13,9 +13,10 @@ Primary stack: **HTML, CSS, JavaScript, PHP** (mostly small websites and holding
 
 - All hands-on work lives in **`projects/`** (one entry per project). This folder is
   Git-ignored — see [PROJECTS.md](PROJECTS.md).
-- A project under `projects/` may be a real subfolder **or a junction** to a folder
-  elsewhere on the PC (managed by `Set-Project.ps1`). When a project is linked in (e.g. the
-  Mariart plugin), treat it as living at its real location — match that codebase's existing
+- A project under `projects/` may be a real subfolder **or a link** (a Windows junction, or
+  a symlink on macOS) to a folder elsewhere on the machine — managed by `Set-Project.ps1`
+  (Windows) or `set-project.sh` (macOS/Linux). When a project is linked in (e.g. the Mariart
+  plugin), treat it as living at its real location — match that codebase's existing
   conventions and preserve its line endings.
 - Each project is **self-contained**: its own `index` entry point, `assets/` for
   images/fonts/SVG, and a short `README.md`.
@@ -33,12 +34,12 @@ Primary stack: **HTML, CSS, JavaScript, PHP** (mostly small websites and holding
 
 ## 3. Formatting (enforced by the tool configs in this folder)
 
-Handled by `.editorconfig` and `.prettierrc.json`. **PHP is styled by hand** to the
-house conventions in §8 — no PHP auto-formatter is used:
+Handled by `.editorconfig`, `.prettierrc.json`, and `.php-cs-fixer.dist.php` (PSR-12 for
+PHP — see §8):
 
 | | Setting |
 |---|---|
-| Indentation | **2 spaces** (HTML/CSS/JS/JSON) · **4 spaces** (PHP — Mariart house style, see §8) |
+| Indentation | **2 spaces** (HTML/CSS/JS/JSON) · **4 spaces** (PHP, PSR-12) |
 | Encoding | UTF-8 |
 | Line endings | LF (CRLF only for `.ps1` / `.bat` / `.cmd`) |
 | Line length | aim for ≤ 100 characters |
@@ -94,85 +95,64 @@ house conventions in §8 — no PHP auto-formatter is used:
 - Keep interactions **accessible**: keyboard-operable, correct ARIA, respect
   `prefers-reduced-motion`.
 
-## 8. PHP — Mariart house style
+## 8. PHP
 
-PHP follows the established style of the **Mariart WordPress plugin**
-(`…/wp-content/plugins/mariart`). It is a deliberate, bespoke style — **not** PSR-12 and
-**not** the default WordPress standard. **Do not run an auto-formatter on PHP** (PHP CS
-Fixer / Prettier would strip these conventions). When editing existing files, match the
-file you are in — including its indentation and line endings.
+New PHP that Claude writes follows **PSR-12**, with the modern defaults below. Code Claude
+did **not** generate is exempt — see "Existing / third-party code" at the end.
 
-**Layout & structure**
-- **4-space indentation**, no tabs. The whole file body is indented one level beneath the
-  opening `<?php`.
-- One class per file; the filename matches the class. Namespaced under `Mariart\…` and
-  autoloaded from `library/`.
-- Opening brace on the **same line** (`class Foo {`, `function bar () {`, `if (…) {`).
-- `else` / `elseif` go on their **own line** after the closing brace — never cuddled.
-- Annotate every closing brace with what it closes: `} // methodName ()`, `} // if ()`,
-  `} // class Foo`.
-- Generous vertical spacing (about three blank lines between methods).
-- PHPDoc `/** … */` on classes, methods and properties.
-
-**Spacing — the signature of this style**
-- A **space before every `(`** — calls, definitions and control structures alike:
-  `function register ()`, `add_action ('init', …)`, `if (empty ($x) === true)`.
-- A **space before `[`** on array access: `$args ['key']`.
-- No spaces just inside `( … )`; no spaces around the `.` concatenation operator: `$name.'s'`.
-
-**Syntax & naming**
-- **Long array syntax**: `array ( 'a' => 1 )`, not `[]`.
-- **Single quotes** by default.
-- Explicit boolean comparisons: `empty ($x) === true`, `… === false`.
-- Classes `PascalCase`; methods `camelCase`; functions & local variables `snake_case`;
-  constants `UPPER_SNAKE`.
-- Private/protected properties **and** methods are prefixed with `_`: `$_slug`, `_init ()`.
-- Singletons use the `Singleton` trait: `use Singleton;` + `getInstance ()`, with setup done
-  in `_init ()`.
-
-**WordPress & templates**
-- Use WordPress APIs (`add_action`, `register_post_type`, `__ ()`, `_x ()`, `$wpdb->prepare`).
-- Templates open with the guard `if (!defined ('ABSPATH')) { die (); }` and a `@var` docblock
-  for the variables passed in.
-- In templates use the **alternative syntax** (`foreach (…): … endforeach;`, `if (…): … endif;`).
-- **Escape on output**: `esc_html ()`, `esc_attr ()`, `esc_url ()`, `wp_kses_post ()`.
+**Style**
+- **4-space indentation**, no tabs. Files start with `<?php`; pure-PHP files omit the
+  closing `?>`.
+- One class per file. `StudlyCaps` class names, `camelCase` methods and variables,
+  `SCREAMING_SNAKE_CASE` constants. `namespace` then `use` declarations at the top.
+- Braces: on their **own line** for classes and functions/methods; on the **same line** for
+  control structures (`if (…) {`). Always use braces, even for a single statement.
+- **Short array syntax** `[…]`; **single quotes** unless interpolating.
+- Declare visibility on every property and method; add parameter and return **type
+  declarations** where practical. One blank line between methods.
 
 **Security — non-negotiable**
-- Escape all output; never trust `$_GET` / `$_POST` / `$_FILES` — validate and sanitise.
-- Use `$wpdb->prepare ()` or WP query APIs — never concatenate SQL.
-- Use nonces on forms and admin actions; keep credentials out of tracked code.
+- **Escape all output** before printing: `htmlspecialchars($v, ENT_QUOTES, 'UTF-8')`, or in
+  WordPress `esc_html()` / `esc_attr()` / `esc_url()` / `wp_kses_post()`.
+- **Never concatenate SQL** — use prepared statements (PDO / mysqli bound parameters, or
+  `$wpdb->prepare()`).
+- **Validate and sanitise all input** (`$_GET` / `$_POST` / `$_FILES`); use nonces on forms.
+- Keep credentials/keys in a **Git-ignored** config file; in production, log errors rather
+  than displaying them.
 
-**Example**
+**WordPress**
+- Use WordPress APIs (`add_action`, `register_post_type`, `wp_enqueue_script`, `__()`, …)
+  together with the escaping/sanitising rules above.
+
+**Existing / third-party code (not written by Claude)**
+- Code Claude did not generate — e.g. the linked **Mariart plugin**, which uses its own
+  bespoke style — is **exempt from PSR-12**. When editing such a file, **match the style
+  already in that file** (indentation, spacing, naming, brace placement) and preserve its
+  line endings. Do **not** reformat it as a side effect of an edit.
+- Convert existing code to PSR-12 **only when explicitly asked**. On request it can be
+  reformatted with `php-cs-fixer` pointed at that path (see §10), or by hand.
+
+**Example (PSR-12)**
 
 ```php
 <?php
-    namespace Mariart;
 
-    class Example {
+namespace App\Contact;
 
-        /**
-         *  @var string The item slug.
-         */
-        private $_slug;
+class Example
+{
+    private string $slug;
 
+    public function register(): void
+    {
+        if ($this->slug === '') {
+            return;
+        }
 
-        /**
-         *  Register our hooks.
-         */
-        public function register () {
-            if (empty ($this->_slug) === true) {
-                return;
-            } // if ()
-            else {
-                add_action ('init', array ($this, 'load'));
-            } // else
-        } // register ()
-
-    } // class Example
+        add_action('init', [$this, 'load']);
+    }
+}
 ```
-
-> Legacy note: a little older code (e.g. one method in `Util.php`) uses tabs and double
-> quotes. That's drift, not the standard — follow the 4-space / single-quote style above.
 
 ## 9. Git
 
@@ -189,8 +169,13 @@ EditorConfig and Prettier extensions). To run the formatters manually:
 ```powershell
 # HTML / CSS / JS / JSON / Markdown  (needs Node.js)
 npx prettier --write .
+
+# PHP — PSR-12  (needs PHP + Composer + PHP CS Fixer)
+vendor/bin/php-cs-fixer fix                     # Claude-generated projects (safe default)
+vendor/bin/php-cs-fixer fix projects/mariart    # existing code: only on request, by path
 ```
 
-Prettier is an optional convenience — `.editorconfig` alone keeps indentation and line
-endings consistent with no installation required. **Do not point Prettier or PHP CS Fixer
-at PHP files** — the Mariart house style (§8) is intentionally not auto-formatter-friendly.
+`.php-cs-fixer.dist.php` deliberately **skips linked-in / third-party code** (e.g. the
+Mariart plugin) on a blanket run, so existing code is reformatted only when you point the
+fixer at its path explicitly. `.editorconfig` alone keeps indentation and line endings
+consistent with no installation required.
