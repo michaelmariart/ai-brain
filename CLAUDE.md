@@ -11,8 +11,12 @@ Primary stack: **HTML, CSS, JavaScript, PHP** (mostly small websites and holding
 
 ## 1. Workspace layout
 
-- All hands-on work lives in **`projects/`** (one subfolder per project). This folder is
+- All hands-on work lives in **`projects/`** (one entry per project). This folder is
   Git-ignored — see [PROJECTS.md](PROJECTS.md).
+- A project under `projects/` may be a real subfolder **or a junction** to a folder
+  elsewhere on the PC (managed by `Set-Project.ps1`). When a project is linked in (e.g. the
+  Mariart plugin), treat it as living at its real location — match that codebase's existing
+  conventions and preserve its line endings.
 - Each project is **self-contained**: its own `index` entry point, `assets/` for
   images/fonts/SVG, and a short `README.md`.
 - Use **relative paths** inside a project (`assets/logo.svg`), never absolute local paths
