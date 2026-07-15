@@ -1,0 +1,56 @@
+/* {{PROJECT_TITLE}} — base styles (mobile-first) */
+
+:root {
+  --navy: #002742;
+  --orange: #f37021;
+  --ink: #1a1a1a;
+  --paper: #ffffff;
+  --font: "Noto Sans", system-ui, sans-serif;
+  --space: 1rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+header,
+main,
+footer {
+  padding: var(--space);
+  max-width: 60rem;
+  margin-inline: auto;
+}
+
+h1 {
+  color: var(--navy);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #f2f2f2;
+    --paper: #101418;
+  }
+  h1 {
+    color: var(--orange);
+  }
+}
