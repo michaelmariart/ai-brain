@@ -1,0 +1,81 @@
+# The two-tier brain
+
+This workspace has **two layers of knowledge**, and they stay separate on purpose:
+
+| Tier | Lives in | Applies to | Managed by |
+|---|---|---|---|
+| **Local** | `AI Brain/.claude/skills` and `.claude/agents` | only this workspace | you, in this Git repo |
+| **Company** | your user-level `~/.claude/skills` and `~/.claude/agents` | **every** project on your machine | synced from the company share |
+
+Your local skills and agents are yours: they live in this repo, you edit them freely, and a
+company sync never touches them. The company tier is shared knowledge everyone gets.
+
+## The company brain folder
+
+A shared folder (usually a network share) laid out like this:
+
+```
+<CompanyBrain>/
+├── skills/                 ← one folder per skill, each with a SKILL.md
+│   └── <skill-name>/SKILL.md
+├── agents/                 ← one .md file per agent
+│   └── <agent-name>.md
+├── clients/                ← client data (read in place, never copied)
+└── requirements/           ← company requirements & standards (read in place)
+```
+
+**Skills and agents are copied** to your machine so they work in every project — and keep
+working when you're off the network. **Client data and requirements are not copied**: they
+are read straight from the share, so there is only ever one copy of client information.
+
+## Setting it up
+
+Run once, pointing at the share:
+
+```powershell
+# Windows
+.\Sync-CompanyBrain.ps1 -Path "\\server\share\CompanyBrain"
+```
+```bash
+# macOS / Linux
+./sync-company-brain.sh --path "/Volumes/Share/CompanyBrain"
+```
+
+The location is remembered, so afterwards you just run it with no arguments.
+
+| Task | Windows | macOS / Linux |
+|---|---|---|
+| Sync / pick up company updates | `.\Sync-CompanyBrain.ps1` | `./sync-company-brain.sh` |
+| See what's synced | `.\Sync-CompanyBrain.ps1 -Status` | `./sync-company-brain.sh --status` |
+| Remove company items | `.\Sync-CompanyBrain.ps1 -Remove` | `./sync-company-brain.sh --remove` |
+| Point at a new location | `.\Sync-CompanyBrain.ps1 -Path "…"` | `./sync-company-brain.sh --path "…"` |
+
+Re-run the sync whenever the company brain has been updated.
+
+## How your own work is protected
+
+A manifest (`~/.claude/.company-brain-manifest`) records exactly which skills and agents came
+from the company brain. Because of it:
+
+- **Your local skills and agents are never modified or deleted** — syncing only ever touches
+  items listed in the manifest.
+- **Name clashes are skipped and reported** — if you have a skill with the same name as a
+  company one, *yours wins* and the company version is ignored.
+- **Items removed from the company brain are cleaned up** on the next sync, so you don't
+  accumulate stale copies.
+- **`-Remove` only removes company items**, leaving everything you made in place.
+
+## Why copies rather than links
+
+Windows directory *junctions* can't point at a network (UNC) path, and directory *symlinks*
+need administrator rights. Copying avoids both problems, and has a useful side effect: the
+company skills still work when you're offline or off the VPN. The trade-off is that you must
+re-run the sync to pick up company changes.
+
+## Where Claude looks
+
+The sync writes a small managed block into your user-level `~/.claude/CLAUDE.md` recording
+the company brain location, so Claude knows where to find `clients/` and `requirements/` in
+any project. Only that marked block is touched — anything else in that file is left alone.
+
+> **Client data stays on the share.** Don't copy it into a project folder or a Git repo.

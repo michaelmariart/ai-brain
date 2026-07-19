@@ -121,14 +121,16 @@ Then replace the placeholders in the copied files:
 - `{{PROJECT_TITLE}}` → a human-readable title (e.g. "EFP Services").
 - `{{PROJECT_ONE_LINER}}` → the one-line description from Step 1.
 
-The starter already follows the workspace standards in `CLAUDE.md` (semantic
-HTML5, one `<h1>`, viewport + `lang`, mobile-first CSS with light/dark support,
-vanilla JS, separated concerns). Adjust it to fit the actual project rather than
-leaving boilerplate — but keep those standards.
+The starter already follows the **coding** skill (semantic HTML5, one `<h1>`,
+viewport + `lang`, mobile-first CSS with light/dark support, vanilla JS,
+separated concerns). Invoke that skill when writing the scaffold, and adjust it
+to fit the actual project rather than leaving boilerplate — but keep those
+standards.
 
 If the project clearly isn't a static site (e.g. it's a PHP/WordPress thing),
 scaffold the equivalent sensible entry point instead of `index.html`, still with
-`assets/` and `README.md`, and follow the PHP rules in `CLAUDE.md` §8.
+`assets/` and `README.md`, and follow the PHP rules in the **coding** skill
+(plus **wordpress-development** for WordPress work).
 
 ## Step 5 — Verify and report
 

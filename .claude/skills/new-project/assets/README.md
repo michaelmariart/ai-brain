@@ -18,4 +18,4 @@ npx serve .
 
 ## Notes
 
-Follows the workspace coding standards in the root `CLAUDE.md`.
+Follows the workspace coding standards.
