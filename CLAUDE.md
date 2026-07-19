@@ -6,6 +6,15 @@ established style, match that project first and use these as the baseline.
 
 Primary stack: **HTML, CSS, JavaScript, PHP** (mostly small websites and holding pages).
 
+> **⚠ Read the company master context too: `Z:\CLAUDE.md`**
+> (the root of the clients share — on macOS, the root of the mounted share.)
+> It is the Mariart Studio master brain and **must be used in conjunction with this
+> file**. It carries the studio-wide standards for *all* work — Australian English,
+> client confidentiality, verbatim transfers, and which skills to load. It only loads
+> automatically for sessions opened **inside** the share, so when working here in the
+> local AI Brain you must read it yourself. Where the two overlap, the company master
+> context wins; this file adds the workspace-specific conventions on top.
+
 > **Coding standards live in the company `coding` skill.**
 > Before writing or editing **any** code in this workspace — creating or changing
 > HTML/CSS/JS/PHP, building a page, component, block, plugin or WordPress functionality,
@@ -34,7 +43,13 @@ Primary stack: **HTML, CSS, JavaScript, PHP** (mostly small websites and holding
 
 ## 1a. Two-tier brain (local + company)
 
-Skills and agents come from two places — see [COMPANY-BRAIN.md](COMPANY-BRAIN.md):
+The company brain is the shared studio brain on the clients share; this workspace is the
+local tier on top of it — see [COMPANY-BRAIN.md](COMPANY-BRAIN.md):
+
+- **Master context** — `Z:\CLAUDE.md` at the share root. Read it **in conjunction with**
+  this file on every task; it holds the standards that apply to all studio work.
+
+Skills and agents come from two places:
 
 - **Local** — this workspace's `.claude/skills` and `.claude/agents`. Yours, tracked in this
   repo, and only active here.

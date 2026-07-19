@@ -78,6 +78,7 @@ contains() {
 update_user_memory() {
     company="$1"
     refs="${2:-}"
+    master="${3:-}"
     tmp="$claude_home/.claude-md.tmp"
     mkdir -p "$claude_home"
     if [ -f "$user_memory" ]; then
@@ -99,6 +100,13 @@ update_user_memory() {
             printf '%s\n' "$block_begin"
             printf '## Company brain\n\n'
             printf 'Shared company knowledge lives at: %s\n\n' "$company"
+            if [ -n "$master" ]; then
+                printf -- '- **Company master context: %s** - ALWAYS read and follow it,\n' "$master"
+                printf -- '  in conjunction with any project or workspace CLAUDE.md. It carries the studio-wide\n'
+                printf -- '  standards that apply to all work.\n'
+            else
+                printf -- '- No company master CLAUDE.md found on the share.\n'
+            fi
             printf -- '- Company **skills** and **agents** from there are synced into your user-level .claude\n'
             printf -- '  folder, so they are available in every project.\n'
             if [ -n "$refs" ]; then
@@ -221,7 +229,19 @@ for d in "$company"/*; do
     fi
 done
 
-update_user_memory "$company" "$refs"
+# The company master CLAUDE.md: in the brain folder, or at the share root above it
+master=""
+if [ -f "$company/CLAUDE.md" ]; then
+    master="$company/CLAUDE.md"
+elif [ -f "$(dirname "$company")/CLAUDE.md" ]; then
+    master="$(dirname "$company")/CLAUDE.md"
+fi
+
+update_user_memory "$company" "$refs" "$master"
+
+if [ -n "$master" ]; then
+    echo "Master context:  $master  (read in place, alongside local CLAUDE.md)"
+fi
 
 n_skills=0; for s in $new_skills; do n_skills=$((n_skills+1)); done
 n_agents=0; for a in $new_agents; do n_agents=$((n_agents+1)); done

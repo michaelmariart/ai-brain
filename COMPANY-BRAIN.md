@@ -10,6 +10,26 @@ This workspace has **two layers of knowledge**, and they stay separate on purpos
 Your local skills and agents are yours: they live in this repo, you edit them freely, and a
 company sync never touches them. The company tier is shared knowledge everyone gets.
 
+## The master context file
+
+At the **root of the clients share** sits `CLAUDE.md` (on this machine, `Z:\CLAUDE.md`) —
+the Mariart Studio master brain. It holds the standards that apply to **all** studio work:
+Australian English, client confidentiality, verbatim transfers, and which skills to load
+for which job.
+
+**It must be used in conjunction with the local `CLAUDE.md` in this workspace.** Claude
+loads it automatically for sessions opened *inside* the share, but **not** when you're
+working here in the local AI Brain on your own drive — so it is referenced explicitly from
+this workspace's `CLAUDE.md`, and the sync writes a pointer to it into your user-level
+`~/.claude/CLAUDE.md` so it applies in every project.
+
+Where the two overlap, the **master context wins**; the local `CLAUDE.md` adds
+workspace-specific conventions (project layout, the tooling scripts, Git habits) on top.
+
+The sync finds it automatically — in the company brain folder, or at the share root above
+it — so the pointer stays correct even if the drive mapping changes. It is **read in place,
+never copied**: Alison maintains it and it is read-only for everyone else.
+
 ## The company brain folder
 
 A shared folder (usually a network share) laid out like this:

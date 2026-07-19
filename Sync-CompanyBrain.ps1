@@ -92,7 +92,7 @@ function Write-Manifest($companyPath, $skills, $agents) {
     Set-Content -LiteralPath $manifest -Value $lines -Encoding UTF8
 }
 
-function Update-UserMemory($companyPath, $refFolders) {
+function Update-UserMemory($companyPath, $refFolders, $masterContext) {
     $text = ''
     if (Test-Path -LiteralPath $userMemory) {
         $text = Get-Content -LiteralPath $userMemory -Raw
@@ -108,12 +108,17 @@ function Update-UserMemory($companyPath, $refFolders) {
         if ($null -ne $refFolders -and $refFolders.Count -gt 0) {
             $refLine = '- Reference material on the share, read it IN PLACE: ' + ($refFolders -join ', ')
         }
+        $masterLine = '- No company master CLAUDE.md found on the share.'
+        if (-not [string]::IsNullOrWhiteSpace($masterContext)) {
+            $masterLine = '- **Company master context: ' + $masterContext + '** - ALWAYS read and follow it,' + [Environment]::NewLine + '  in conjunction with any project or workspace CLAUDE.md. It carries the studio-wide' + [Environment]::NewLine + '  standards that apply to all work.'
+        }
         $template = @'
 {0}
 ## Company brain
 
 Shared company knowledge lives at: {1}
 
+{4}
 - Company **skills** and **agents** from there are synced into your user-level .claude
   folder, so they are available in every project.
 {3}
@@ -121,7 +126,7 @@ Shared company knowledge lives at: {1}
 - Re-sync with Sync-CompanyBrain.ps1 (Windows) or sync-company-brain.sh (macOS/Linux).
 {2}
 '@
-        $block = [string]::Format($template, $blockBegin, $companyPath, $blockEnd, $refLine)
+        $block = [string]::Format($template, $blockBegin, $companyPath, $blockEnd, $refLine, $masterLine)
         if ([string]::IsNullOrWhiteSpace($text)) { $text = $block }
         else { $text = $text + "`r`n`r`n" + $block }
     }
@@ -246,8 +251,26 @@ foreach ($d in (Get-ChildItem -LiteralPath $company -Directory -ErrorAction Sile
     if ($d.Name -ne 'skills' -and $d.Name -ne 'agents') { $refFolders += $d.Name }
 }
 
+# The company master CLAUDE.md: in the brain folder, or at the share root above it
+$masterContext = ''
+$candidate = Join-Path $company 'CLAUDE.md'
+if (Test-Path -LiteralPath $candidate) {
+    $masterContext = $candidate
+}
+else {
+    $parent = Split-Path -Parent $company
+    if (-not [string]::IsNullOrWhiteSpace($parent)) {
+        $candidate = Join-Path $parent 'CLAUDE.md'
+        if (Test-Path -LiteralPath $candidate) { $masterContext = $candidate }
+    }
+}
+
 Write-Manifest $company $newSkills $newAgents
-Update-UserMemory $company $refFolders
+Update-UserMemory $company $refFolders $masterContext
+
+if (-not [string]::IsNullOrWhiteSpace($masterContext)) {
+    Write-Host "Master context:  $masterContext  (read in place, alongside local CLAUDE.md)"
+}
 
 Write-Host "Company brain:  $company"
 Write-Host ("Synced {0} skill(s) and {1} agent(s) into {2}" -f $newSkills.Count, $newAgents.Count, $claudeHome)
