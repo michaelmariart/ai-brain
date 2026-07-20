@@ -271,6 +271,35 @@ The next columns block anyone inserts gets the 1.75em back, and the editor shows
 (`margin-block-start`, `--wp--style--block-gap`, `wp-container-`) and confirm every
 surviving value is one you can point at in Figma.
 
+**`[SET]` Build mobile-first.** Decided by Alison, 20 July 2026.
+
+**The base styles are the mobile design.** Not the desktop design shrunk, and not a guess
+about how the desktop collapses — the actual values from the mobile frame (see §2, which
+requires you to find it before building). Everything outside a media query should render
+the mobile layout correctly on its own.
+
+**Layer larger layouts on with `min-width` only.** A `max-width` query is a signal that
+something was built desktop-first and is being walked back; treat each one as a defect to
+justify or remove. The concrete failure on Dama Charter: the navbar was built from the
+desktop frame, so core's navigation overlay had to be *forced* back on with
+`@media (max-width: 61.999rem)` — patching over a base state that should have been the
+overlay to begin with.
+
+In practice that means:
+
+- **Single column is the default.** Multi-column grids and flex rows are added at a
+  breakpoint, never removed at one.
+- **Stacked is the default.** Splits, cards and columns stack in the base styles.
+- **Type scales up.** Base font sizes come from the mobile frame; larger sizes are added at
+  breakpoints. `clamp()` is fine, but its lower bound must be the mobile design's value
+  rather than an invented floor.
+- **Breakpoints come from where the design actually changes**, not from a standard set of
+  device widths carried in from another project.
+
+**Where only a desktop frame exists,** this rule does not license inventing mobile values —
+§2 still applies: stop and ask whether to interpolate or ship no responsive rules at all.
+Mobile-first describes how the CSS is written, not permission to guess what it contains.
+
 **`[SET]` Styling is hybrid: tokens native, layout in CSS.** Decided by Alison,
 20 July 2026.
 
