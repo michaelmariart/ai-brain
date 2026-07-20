@@ -235,6 +235,22 @@ first time it is edited in the site editor, which is the right moment for it to 
 database state. Content still lives in the database under this rule, because content lives
 in pages. Decided by Alison, 20 July 2026.
 
+### Studio attribution (Mariart credit)
+
+**`[SET]` Wherever the footer credits Mariart, make it a link.** Decided by Alison,
+21 July 2026. When a footer says "Designed by Mariart", "Website by Mariart", or references
+**Mariart** at all, wrap the word *Mariart* (not the surrounding "Designed by" or the ©
+year) in a link to **`https://www.mariart.com.au`**, with **`target="_blank"`** and
+**`rel="noreferrer noopener"`** so it opens in a new tab.
+
+**Style it to the Figma design, not as a default link.** The design draws the credit as
+plain text, so the link inherits the credit's colour and carries no default underline —
+match the footer's own link idiom (e.g. an underline on hover only). It should read as the
+designed text, with a link's behaviour.
+
+This is a studio-wide convention, so it applies even though the credit text itself comes
+from the design verbatim — the *link* is ours to add.
+
 ---
 
 ## 4. Navigation
