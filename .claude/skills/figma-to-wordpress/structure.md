@@ -223,8 +223,30 @@ expire after about 7 days.
 **`[SET]` Bundle fonts locally** as `woff2` under `assets/fonts/`, registered through
 `theme.json` `fontFace`. Do not hotlink Google Fonts — clients are often in the EU.
 
-**`[SET]` Never author an icon by hand.** Use the exported asset. If Figma reports an asset
-as `unknown` it cannot be exported — flag it and ask for the file.
+**`[SET]` Never author an icon by hand.** Use the exported asset.
+
+**`[SET]` Always run `download_assets` as well as `get_design_context`.** They return
+different things, and the difference matters:
+
+- `get_design_context` gives **rendered exports** of nodes, at scale 1 by default — the size
+  the asset appears in the design.
+- `download_assets` also returns **`rawImages`**: the original uploaded source files behind
+  the fills, anywhere in the node subtree.
+
+On Dama Charter this recovered five source images `get_design_context` never surfaced —
+including the **company logo**, which `get_design_context` had reported as `unknown` and
+therefore unexportable, and two genuine client photographs that had simply been missed.
+
+So an asset reported as `unknown` is **not** necessarily unavailable. Check `rawImages`
+before telling anyone a file is missing.
+
+**`[SET]` Check whether the raw sources are actually larger before re-exporting.** Compare
+the raw images against what you already have — hash them, and measure the pixel dimensions.
+If the raw source *is* the low-resolution file, exporting at a higher `defaultScale` only
+upscales it and produces a softer image, not a sharper one. On Dama Charter every raw source
+was byte-identical to the existing asset: 14 of 17 rasters are genuinely low-resolution in
+the design file, the hero included at 500×334. That is a problem to raise with the designer,
+not something export settings can fix.
 
 **`[ASK]` Alt text.** Figma images almost always have empty `alt`. Dama Charter wrote
 descriptive alt text and flagged it for review, since accessibility is required. Confirm
