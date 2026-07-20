@@ -230,18 +230,41 @@ as `unknown` it cannot be exported — flag it and ask for the file.
 descriptive alt text and flagged it for review, since accessibility is required. Confirm
 that, or define a different handling (leave empty, ask the client, use a caption field).
 
-**`[ASK]` Should imported images be sideloaded into the media library?** This is the one
-place where §3's "content in the database" rule is not currently met. Images referenced by
-theme-file URL are not attachments, so they get no `srcset`, no generated sizes, and no
-media-library presence — WordPress serves the full-size original at every breakpoint.
+**`[SET]` Every image and media file is served from the media library.** Decided by Alison,
+20 July 2026. Not from theme-file URLs.
 
-The cost of leaving it: Dama Charter's homepage ships roughly 22 MB of images, including a
-single 12.8 MB JPEG and a 9 MB one, at every viewport including phones.
+The importer sideloads each asset into the uploads directory, creates the attachment, and
+rewrites the block markup to reference it by ID. That is what earns `srcset`, generated
+sizes and a media-library presence — a theme-file URL earns none of them, so WordPress
+serves the full-size original at every breakpoint.
 
-Sideloading on import would fix all of that and make images properly editable, at the cost
-of a more complex importer (dedupe by filename, rewrite `src` to attachment URLs, inject
-attachment IDs into the block markup). Not yet decided, so the Dama Charter importer does
-**not** sideload.
+The cost of getting this wrong is not theoretical: before the change, Dama Charter's
+homepage shipped roughly 22 MB of images, including a 12.8 MB JPEG and a 9 MB one, to
+phones as well as desktops.
+
+Rules for the importer:
+
+- **Dedupe by source filename**, recorded in attachment meta, so re-running never creates
+  a second copy of the same asset.
+- **Set the block's `id` attribute and the `wp-image-<id>` class**, not just the `src`.
+  Without both, WordPress will not generate `srcset` and the exercise is wasted.
+- **The site logo becomes an attachment too**, set via the `site_logo` option, so
+  `wp:site-logo` resolves.
+
+**`[SET]` Raster images go to the library; vectors and decorative assets stay in the theme.**
+Decided by Alison, 20 July 2026.
+
+WordPress blocks SVG uploads because an SVG is XML and can carry `<script>`, which makes it
+a stored XSS vector. Enabling them was considered and rejected: icons, logos, textures and
+list bullets stay as theme assets, and only raster content images are sideloaded. This also
+settles CSS-referenced decorative images, which stay in the theme by the same reasoning.
+
+**`[SET]` Generate attachment sizes, and check that you did.** Sideloading alone is not
+enough — `wp_generate_attachment_metadata()` silently produces no sizes when PHP has no
+image editor available, and `srcset` then never appears even though the markup looks
+correct. This happened on the Dama Charter import, which ran through a CLI PHP without GD
+loaded. Always confirm `srcset` is present in the rendered HTML afterwards; the attachment
+IDs and `wp-image-<id>` classes look perfectly fine while achieving nothing.
 
 ---
 
