@@ -57,10 +57,31 @@ templates.
 **`[SET]` Header and footer are template parts** (`parts/header.html`, `parts/footer.html`),
 each of which just references its pattern.
 
-**`[ASK]` Responsive variants.** Figma files carry `• Desktop` / `• Mobile` frames of the
-same page. Dama Charter only had Desktop, so mobile was inferred from the desktop design
-mobile-first. Should a Mobile frame, when present, be treated as authoritative and matched
-breakpoint-for-breakpoint?
+**`[SET]` Always look for both a desktop and a mobile frame before building.** Decided by
+Alison, 20 July 2026.
+
+Do this **first**, before writing any markup — the answer changes how the CSS is written,
+and retrofitting it is expensive.
+
+**Finding them.** Call `get_metadata` without a `nodeId` to list the file's pages, then on
+the page to list its frames. Match on the page name, not the exact separator: the usual
+form is `Home - Desktop` / `Home - Mobile`, but separators vary (`-`, `–`, `•`, `/`, `|`)
+and so do the labels (`Mobile`, `Mob`, `Phone`, `Small`; `Desktop`, `Web`, `Large`). Match
+loosely and case-insensitively rather than assuming one convention.
+
+**When both exist:** the mobile frame is authoritative for small screens. Build
+mobile-first from it and match it breakpoint-for-breakpoint rather than guessing how the
+desktop layout should collapse.
+
+**When only one exists: stop and ask.** Never decide this silently. Offer exactly two
+options:
+
+1. **Interpolate** — infer the responsive behaviour from the desktop design, mobile-first.
+   Reasonable, but every breakpoint is then an assumption nobody has approved.
+2. **No responsive rules** — build the design as given, with no breakpoint behaviour at
+   all.
+
+Record the answer, because it is a per-project decision rather than a house default.
 
 **`[ASK]` Which templates should a site always ship?** Dama Charter has only
 `front-page.html` and `index.html`. Is there a standard set — `page`, `single`, `archive`,
