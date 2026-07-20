@@ -12,9 +12,12 @@ Each rule is marked:
 A project can override any of this with its own `figma-structure.md` at the project root.
 The project file wins where the two overlap.
 
-> The `[SET]` rules below were derived from the Dama Charter build (July 2026) and are
+> Most `[SET]` rules below were derived from the Dama Charter build (July 2026) and are
 > **provisional** — they are what was actually done once, not a considered house standard.
 > Correct them.
+>
+> **§3 is different.** It is a deliberate ruling from Alison and is not provisional. Where
+> anything else in this file conflicts with §3, §3 wins.
 
 ---
 
@@ -39,7 +42,9 @@ Figma import produces theme markup and styles, not plugin output.
 title; its slug is the kebab-case of that name. `Home • Desktop` → front page.
 
 **`[SET]` One Figma section instance = one block pattern**, in `patterns/<section>.php`,
-registered under the `<project-slug>` pattern category with `Inserter: no`.
+registered under the `<project-slug>` pattern category. The pattern emits **block markup**
+(§3) and exists to *seed* real page content — it is never the permanent home of copy. Keep
+it in the inserter so a section can be added again later.
 
 **`[SET]` Pages are assembled by templates, not by pasted markup.** A template composes
 patterns via `<!-- wp:pattern {"slug":"…"} /-->` — never duplicate section markup between
@@ -71,22 +76,48 @@ nothing in the codebase.
 
 ## 3. Where content lives
 
-**`[ASK]` This is the most important undecided rule.**
+**`[SET]` Everything imported from Figma must be editable. No content in PHP, ever.**
 
-Dama Charter hardcoded all copy into the patterns, with repeated items (tour cards,
-testimonials, FAQs, blog cards) as PHP arrays at the top of each pattern file. That is fast
-to build and pixel-exact, but **the client cannot edit any of it** without touching code.
+Decided by Alison, 20 July 2026. This is absolute — it outranks build speed and pixel
+convenience, and it applies to every section without exception:
 
-The options, roughly in order of editing freedom:
+- **No hardcoded content in PHP.** No copy, no arrays of cards, reviews, FAQs or tour
+  options, no `esc_html('…')` wrapping a client's words. If a sentence exists only inside
+  a `.php` file, the rule is broken.
+- **Every content section is block markup**, in the WordPress Full Site Editing format.
+- **Core blocks first.** Use a standard WordPress block wherever one fits the section.
+- **Build a custom block** only where no core block covers what the design needs.
+- **Content and settings for pages, posts and the like live in the database**, not in
+  theme files.
 
-1. **Hardcoded in patterns** — what Dama Charter did. No client editing.
-2. **Editable block content** — patterns emit core blocks so the page can be edited in the
-   site editor. Client edits freely; layout can drift from the design.
-3. **Custom post types + fields** — repeated items (tours, testimonials, FAQs) become CPTs
-   rendered by the pattern. Client edits safely; most build effort.
+### What this means in practice
 
-Ask which applies, per content type — the answer is often different for a hero (1) and a
-testimonials list (3).
+Registering `patterns/*.php` is **not** enough. A pattern is theme code; it is not content.
+The content of record is the database copy, so an import has to actually create the pages
+and write block markup into `post_content`.
+
+Patterns stay useful as the *seed* — the thing that stamps a section into a page — but once
+stamped, the page in the database is what the client edits, and the pattern file stops
+being the source of truth. Editing the pattern file afterwards will not change a live page.
+
+This also rules out the convenient shortcut of looping a PHP array inside a pattern to
+render repeated cards. Repeated items are either repeated blocks in the database, or a
+custom block backed by post data — never a PHP array.
+
+**`[ASK]` How does content reach the database on a fresh install?** Something has to create
+the pages and insert the block markup — a theme activation routine, WP-CLI, or a person
+pasting patterns in the editor. Each has very different re-run behaviour. Not yet decided.
+
+**`[ASK]` Where do custom blocks live, and how are they built?** A block that content
+depends on will break the site if it disappears with a theme switch, which is the usual
+argument for putting blocks in a plugin — but §1 currently says the import produces a
+theme. Also undecided: `block.json` with a `@wordpress/scripts` build, versus the
+hand-rolled no-build style the Mariart plugin uses.
+
+**`[ASK]` Do templates and template parts also have to be database records?** The rule names
+"content pages, posts, etc". FSE templates start as theme files and only become database
+records once edited. Confirm whether shipping `templates/*.html` as the default is
+acceptable, or whether those must be seeded into the database too.
 
 ---
 
@@ -151,6 +182,12 @@ that, or define a different handling (leave empty, ask the client, use a caption
 ---
 
 ## 8. Worked example — Dama Charter
+
+> ⚠️ **This build does not comply with §3 and must not be copied as a model.** It was built
+> before the editability ruling: every section is hardcoded PHP, with the repeated items
+> (tour cards, testimonials, FAQs, blog cards, tour radio options) as PHP arrays inside the
+> pattern files, and no content in the database. None of it is client-editable. It is kept
+> here only as a section-mapping reference and as the record of the truncation bug below.
 
 Homepage, 12 sections, built July 2026. `Home • Desktop` → `templates/front-page.html`,
 composing twelve patterns:
