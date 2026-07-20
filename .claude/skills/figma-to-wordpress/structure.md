@@ -397,6 +397,31 @@ expire after about 7 days.
 
 **`[SET]` Never author an icon by hand.** Use the exported asset.
 
+**`[SET]` Social icons come from the design, never a brand style guide.** Decided by
+Alison, 21 July 2026. Core's Social Icons block (`core/social-links`) ships each platform's
+official glyph and brand colour — the wrong shape and the wrong colour when the design has
+drawn its own (monochrome, a single scheme colour, a particular weight). Keep the block, so
+the links stay editable in the database (§3), but neutralise its appearance and paint the
+design's glyph instead:
+
+- Apply the **`is-style-logos-only`** variation to drop core's coloured pills.
+- **Strip core's `<svg>` from the output**, not just hide it — a `render_block_core/social-link`
+  filter that removes the `<svg>…</svg>` (keep core's screen-reader label). A WordPress
+  glyph must never appear in the HTML, only be `display:none`'d.
+- **`mask` each anchor** with the design's exported SVG (`assets/images/…svg`, a theme
+  asset per the raster/vector split above), coloured with a `background-color` token from
+  `theme.json`.
+- **The `<a>` is the fixed container.** Give every link the *same* box, sized to the
+  largest icon in each axis (largest width across all icons × largest height across all
+  icons), so the click targets are identical.
+- **Centre each glyph at its own intrinsic size inside that box** — `mask-size` set to the
+  SVG's own dimensions (never `contain`, which would scale it to fill) and `mask-position:
+  center`. The design's icons differ in aspect (a wide play button beside a square camera);
+  a uniform box with centred, intrinsically-sized glyphs keeps every shape true.
+
+The same reasoning applies to any core block that substitutes its own house iconography for
+the design's.
+
 **`[SET]` Always run `download_assets` as well as `get_design_context`.** They return
 different things, and the difference matters:
 
