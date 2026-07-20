@@ -191,21 +191,50 @@ markup.
 **`[SET]` Gap, not margin.** Space between elements is `gap` on the flex/grid parent,
 matching how Figma auto-layout expresses it. Avoid margins for layout spacing.
 
-**`[SET]` Set `styles.spacing.blockGap` to `0` in `theme.json`.** Decided by Alison,
-20 July 2026, after white space appeared between every section.
+**`[SET]` WordPress contributes no spacing. Every padding, gap and margin comes from the
+Figma design.** Decided by Alison, 20 July 2026.
 
-WordPress defaults the block gap to 24px and enforces it with
+Core ships opinionated spacing on nearly every block, and none of it is in the design. It
+is not a starting point to adjust — it is noise to remove. If a spacing value in the
+rendered page cannot be traced back to a Figma variable or an auto-layout value, it should
+not be there.
+
+**Start by zeroing the block gap:** set `styles.spacing.blockGap` to `0` in `theme.json`.
+WordPress defaults it to 24px and enforces it with
 `:where(.is-layout-flow) > * { margin-block-start: … }`, which lands on every top-level
 section inside `wp-block-post-content` and again on `.wp-site-blocks`. Figma sections butt
 straight up against each other and carry their own padding, so that 24px is always wrong.
 
-Zeroing it at the root is safe **only because the theme sets its own gaps** — the hybrid
-rule above means every flex and grid container already declares one. Confirm that before
-zeroing: if any layout relies on the inherited 24px, it will collapse.
+**Then strip the per-block defaults.** These are the ones that bit on Dama Charter — treat
+it as a checklist, not an exhaustive list:
 
-Fix it in `theme.json`, not with a CSS override. A CSS-only fix leaves the site editor
-still showing 24px gaps the front end doesn't have, which is exactly the editor-lying
-problem the hybrid rule exists to prevent.
+| Block | What core adds |
+|---|---|
+| `core/quote` | left border, text indent, bottom margin |
+| `core/list`, `core/post-template` | `padding-inline-start`, list margins |
+| `core/separator` | border-bottom, constrained width, vertical margins |
+| `core/columns` | its own `gap`, plus `flex-basis`/`flex-grow` on columns |
+| `core/social-links` | its own `gap` and icon sizing |
+| `core/image` | `<figure>` user-agent margins |
+| `core/button` | padding and border on the link |
+| `core/navigation` | `gap` between items |
+
+Much of this arrives via `add_theme_support('wp-block-styles')`. If the design supplies
+every value — and under this rule it should — consider not adding that support at all
+rather than overriding it block by block.
+
+**Two conditions on doing this safely:**
+
+1. **The theme must declare its own gaps first.** Zeroing the root gap only works because
+   every flex and grid container sets one explicitly. Check before zeroing, or layouts
+   relying on the inherited 24px will collapse.
+2. **Fix it in `theme.json`, not with a CSS override**, wherever `theme.json` can express
+   it. A CSS-only fix leaves the site editor showing spacing the front end doesn't have,
+   which is exactly the editor-lying problem the hybrid rule exists to prevent.
+
+**How to check:** search the rendered HTML for core's generated spacing rules
+(`margin-block-start`, `--wp--style--block-gap`, `wp-container-`) and confirm every
+surviving value is one you can point at in Figma.
 
 **`[SET]` Styling is hybrid: tokens native, layout in CSS.** Decided by Alison,
 20 July 2026.
