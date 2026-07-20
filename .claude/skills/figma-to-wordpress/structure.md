@@ -166,13 +166,19 @@ links are hardcoded anchors to on-page sections.
 
 ## 5. Forms
 
-**`[ASK]` The company `wordpress-development` skill names Gravity Forms.** Dama Charter's
-enquiry form was built as accessible HTML with no handler, because Gravity Forms was not
-installed.
+**`[SET]` Forms are Gravity Forms.** Decided by Alison, 20 July 2026. Never hand-rolled
+HTML with no handler, and never a custom form block — WordPress has no core form block, and
+GF is the house tool the company `wordpress-development` skill already names.
 
-Define: is Gravity Forms always the target? Should the import build the GF form definition
-itself, or emit a placeholder and a note for someone to build the form in the GF UI? Where
-do submissions go?
+The contact section renders the `gravityforms/form` block, referencing the form by ID.
+
+**`[ASK]` Does the import create the form definition, or expect one to exist?** A GF form is
+database state, so creating it from the design's fields via `GFAPI::add_form()` fits the §3
+ruling — but a form built in the GF UI is easier for a non-developer to adjust afterwards.
+Not yet decided.
+
+**`[ASK]` Where do submissions go?** GF notifications need a destination address, which the
+design cannot supply. Always ask; never guess a client's email.
 
 ---
 
@@ -184,6 +190,19 @@ markup.
 
 **`[SET]` Gap, not margin.** Space between elements is `gap` on the flex/grid parent,
 matching how Figma auto-layout expresses it. Avoid margins for layout spacing.
+
+**`[SET]` Styling is hybrid: tokens native, layout in CSS.** Decided by Alison,
+20 July 2026.
+
+- **`theme.json` owns the tokens** — colour, type scale, spacing — built from the Figma
+  variables. The site editor's controls then offer the real palette and sizes, so anything
+  a client changes stays on-system.
+- **The stylesheet owns section layout** — grids, card composition, bespoke positioning —
+  attached to blocks with `className`.
+
+The point is that editor controls must not lie. A client who opens a colour or spacing
+control should see values that actually apply. Layout that no control exposes belongs in
+CSS, where it cannot be half-changed into something broken.
 
 **`[ASK]` How literally should the desktop design be reproduced?** The company skill says
 "pixel-faithful". Dama Charter interpreted that as: exact tokens and structure, but fluid
@@ -210,6 +229,19 @@ as `unknown` it cannot be exported — flag it and ask for the file.
 **`[ASK]` Alt text.** Figma images almost always have empty `alt`. Dama Charter wrote
 descriptive alt text and flagged it for review, since accessibility is required. Confirm
 that, or define a different handling (leave empty, ask the client, use a caption field).
+
+**`[ASK]` Should imported images be sideloaded into the media library?** This is the one
+place where §3's "content in the database" rule is not currently met. Images referenced by
+theme-file URL are not attachments, so they get no `srcset`, no generated sizes, and no
+media-library presence — WordPress serves the full-size original at every breakpoint.
+
+The cost of leaving it: Dama Charter's homepage ships roughly 22 MB of images, including a
+single 12.8 MB JPEG and a 9 MB one, at every viewport including phones.
+
+Sideloading on import would fix all of that and make images properly editable, at the cost
+of a more complex importer (dedupe by filename, rewrite `src` to attachment URLs, inject
+attachment IDs into the block markup). Not yet decided, so the Dama Charter importer does
+**not** sideload.
 
 ---
 
