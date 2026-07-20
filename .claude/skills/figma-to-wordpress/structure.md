@@ -129,6 +129,69 @@ This also rules out the convenient shortcut of looping a PHP array inside a patt
 render repeated cards. Repeated items are either repeated blocks in the database, or a
 custom block backed by post data — never a PHP array.
 
+### Lists of other post types (blog, and the like)
+
+**`[SET]` A section that lists another post type is a Query Loop, not repeated cards.**
+Decided by Alison, 21 July 2026.
+
+Some sections in a design are not really bespoke content — they are a *view of a post
+type*. A "latest posts", "from the blog", "news" or "recent articles" strip is the
+clearest case: the design draws two or three cards, but what it means is *show the newest
+posts*. Recognise these and build them as a **Query Loop** (`core/query` +
+`core/post-template` with `core/post-featured-image`, `core/post-terms`, `core/post-title`,
+`core/post-excerpt`, `core/read-more`) that pulls the latest of that post type — never as
+hardcoded card copy.
+
+**How to recognise one.** The section is labelled as, or clearly is, a list of a known
+post type (blog/news/articles → `post`); the cards are homogeneous — same fields repeated
+(image, category, date, title, excerpt, a "read more"); and there is usually a "View all"
+link to the archive. When it looks like a feed, it is one.
+
+**Seed the posts when they don't exist yet.** A Query Loop on an empty site renders
+nothing, so the design's own card content becomes the seed:
+
+- **Create one real post per card shown**, taking the title and the excerpt verbatim from
+  the design. The card's image becomes the post's **featured image**, sideloaded into the
+  media library like any other (§7) — not a theme-file URL.
+- **The body is placeholder.** The design only gives a title and a teaser, never the
+  article, so fill `post_content` with clearly-dummy lorem ipsum. Never invent article
+  copy in a client's voice and never pad the excerpt into a fake body — placeholder must
+  read as placeholder so nobody ships it as finished writing.
+- **Assign categories and tags exactly as the design shows them.** The card's category
+  label (and any tags) are real taxonomy terms — create the terms if missing and attach
+  them. If the design shows a category chip, the seeded post must carry that category, or
+  the rendered card won't match the design.
+- **Stagger the dates** so the newest post is the first card in the design's order — a
+  Query Loop sorts by date, so equal timestamps make the order arbitrary.
+- **Every seeded post ends with a featured image.** Use the card's image if it sideloads,
+  and fall back to the site default (below) if it doesn't — a Query Loop card with an empty
+  image well looks broken.
+
+**`[SET]` Clear WordPress's default sample content at the start of an import.** Decided by
+Alison, 21 July 2026. A fresh install ships a "Hello world!" post that is newer than
+anything seeded, so it takes a slot in a latest-posts loop and shows sample copy on the
+homepage. Trash it (reversible, not deleted) at the top of the importer, guarded to the
+genuine default so a real post is never caught. The sample page and default comment are
+worth clearing on the same principle.
+
+**`[SET]` Provide a site-wide default featured image, so a post thumbnail is always
+available.** Decided by Alison, 21 July 2026. Ship one raster as `default-featured.jpg`,
+sideload it into the library at import and cache its id, then filter `post_thumbnail_id` on
+the **front end only** to return it for any post that has none. The editor keeps showing
+the true "no image set" state so an author still knows to choose one. Because it is one
+swappable theme file, the client changes the default by replacing the file and re-importing
+— no code change.
+
+**Seeding is create-if-missing, keyed by slug.** These are throwaway posts a client will
+replace with real writing, so once one exists the importer leaves it alone — it never
+overwrites a post that may now hold real content. That is a lighter contract than the page
+importer's edit-detection (which does track and protect edits): for seeds, mere existence
+is enough to stop.
+
+**Where the seeding lives.** In the same idempotent WP-CLI importer that builds the pages
+(the "getting content into the database" rule above), and it must run **before** the pages
+so the Query Loop has posts to show on the first pass.
+
 ### Custom blocks
 
 **`[SET]` Custom blocks live in the theme**, at `blocks/<block-name>/`. Decided by Alison,
