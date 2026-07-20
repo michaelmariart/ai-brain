@@ -31,6 +31,10 @@ Zoom Car Wash and Poco Posy put site functionality in a companion plugin
 (`Mariart\Plugin\<Name>`). Dama Charter did not, because it was a bare install and the job
 was a design import. The dividing line is not defined — ask which applies.
 
+*Partly narrowed:* §3 settles that **custom blocks** go in the theme, not a plugin. This
+question is now only about other site functionality — post types, integrations, business
+logic — not about blocks.
+
 **`[SET]` Presentation lives in the theme.** Even where a companion plugin exists, the
 Figma import produces theme markup and styles, not plugin output.
 
@@ -104,20 +108,48 @@ This also rules out the convenient shortcut of looping a PHP array inside a patt
 render repeated cards. Repeated items are either repeated blocks in the database, or a
 custom block backed by post data — never a PHP array.
 
-**`[ASK]` How does content reach the database on a fresh install?** Something has to create
-the pages and insert the block markup — a theme activation routine, WP-CLI, or a person
-pasting patterns in the editor. Each has very different re-run behaviour. Not yet decided.
+### Custom blocks
 
-**`[ASK]` Where do custom blocks live, and how are they built?** A block that content
-depends on will break the site if it disappears with a theme switch, which is the usual
-argument for putting blocks in a plugin — but §1 currently says the import produces a
-theme. Also undecided: `block.json` with a `@wordpress/scripts` build, versus the
-hand-rolled no-build style the Mariart plugin uses.
+**`[SET]` Custom blocks live in the theme**, at `blocks/<block-name>/`. Decided by Alison,
+20 July 2026.
 
-**`[ASK]` Do templates and template parts also have to be database records?** The rule names
-"content pages, posts, etc". FSE templates start as theme files and only become database
-records once edited. Confirm whether shipping `templates/*.html` as the default is
-acceptable, or whether those must be seeded into the database too.
+> **Known trade-off, accepted deliberately.** Page content in the database will reference
+> these blocks, so switching or removing the theme leaves that content rendering as block
+> recovery errors. This was raised and chosen anyway — it keeps the site to a single
+> artefact. Don't re-litigate it, but do keep block names stable, because renaming one
+> breaks every page already saved against it.
+
+**`[SET]` Build blocks with `block.json` and `@wordpress/scripts`.** Modern standard
+tooling: JSX, a build step, asset versioning, proper editor previews. Not the hand-rolled
+no-build style the Mariart plugin uses — that is existing code we match when editing it,
+not a pattern for new work.
+
+**`[SET]` Core blocks first.** A custom block is justified only when no core block, or
+sensible combination of them, expresses the section. Record why in the block's README.
+
+### Getting content into the database
+
+**`[SET]` Ship a WP-CLI command** that creates or updates pages from the patterns.
+Decided by Alison, 20 July 2026.
+
+It must be:
+
+- **Idempotent, keyed by page slug** — safe to run repeatedly; re-running updates rather
+  than duplicating.
+- **`--dry-run` capable**, so a re-import can be inspected before it touches live content.
+- **Explicit about overwriting.** A client may have edited a page since the last import;
+  never silently discard their edits. Report what would change and require confirmation.
+
+Not a theme activation hook — that runs once, is awkward to re-run, and does nothing at all
+on a site that already exists.
+
+### Templates
+
+**`[SET]` Templates and template parts ship as theme files** (`templates/*.html`,
+`parts/*.html`). WordPress promotes one to a `wp_template` database record automatically the
+first time it is edited in the site editor, which is the right moment for it to become
+database state. Content still lives in the database under this rule, because content lives
+in pages. Decided by Alison, 20 July 2026.
 
 ---
 

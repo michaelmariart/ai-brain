@@ -94,7 +94,11 @@ Follow the standards in `coding` and `wordpress-development`, and the mapping in
 - Never hand-draw an icon. If Figma reports an asset as `unknown` it cannot be exported —
   flag it and ask for the file rather than substituting something that looks close.
 
-### 5. Verify it renders
+### 5. Seed the content, then verify it renders
+
+Building the theme is only half the job: under `structure.md` the content of record lives in
+the database, so the pages have to actually be created before there is anything to look at.
+Run the import command, with a dry run first on any site that already has content.
 
 Load the site and check each section at desktop and mobile, and check the console. If the
 site can't be reached, say so plainly rather than reporting the build as verified — and
