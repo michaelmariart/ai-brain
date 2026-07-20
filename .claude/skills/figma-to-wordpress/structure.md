@@ -219,9 +219,23 @@ it as a checklist, not an exhaustive list:
 | `core/button` | padding and border on the link |
 | `core/navigation` | `gap` between items |
 
-Much of this arrives via `add_theme_support('wp-block-styles')`. If the design supplies
-every value — and under this rule it should — consider not adding that support at all
-rather than overriding it block by block.
+**Two separate sources, and removing one does not remove the other:**
+
+- **`wp-block-styles`** — the *opinionated* layer, added by
+  `add_theme_support('wp-block-styles')`. This is where the quote's left border and
+  `1.75em` bottom margin come from. If the design supplies every value — and under this
+  rule it should — **don't add the support at all** rather than overriding it block by
+  block. Dropping it on Dama Charter removed the quote rules and about 2 KB, with no other
+  change.
+- **`wp-block-library`** — the *structural* layer, always loaded, needed for blocks to
+  work. It still ships real spacing: `:where(.wp-block-columns){margin-bottom:1.75em}`
+  survives the above and applies to any columns block. Override these in `theme.json` under
+  `styles.blocks`, e.g. `core/columns` → `spacing.margin.bottom: "0"`. Both rules use
+  `:where()` so specificity ties and source order decides — `theme.json` is emitted later
+  and wins.
+
+Overriding in the stylesheet instead works, but only for the one instance you thought of.
+The next columns block anyone inserts gets the 1.75em back, and the editor shows it.
 
 **Two conditions on doing this safely:**
 
