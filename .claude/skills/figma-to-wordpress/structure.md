@@ -191,6 +191,22 @@ markup.
 **`[SET]` Gap, not margin.** Space between elements is `gap` on the flex/grid parent,
 matching how Figma auto-layout expresses it. Avoid margins for layout spacing.
 
+**`[SET]` Set `styles.spacing.blockGap` to `0` in `theme.json`.** Decided by Alison,
+20 July 2026, after white space appeared between every section.
+
+WordPress defaults the block gap to 24px and enforces it with
+`:where(.is-layout-flow) > * { margin-block-start: … }`, which lands on every top-level
+section inside `wp-block-post-content` and again on `.wp-site-blocks`. Figma sections butt
+straight up against each other and carry their own padding, so that 24px is always wrong.
+
+Zeroing it at the root is safe **only because the theme sets its own gaps** — the hybrid
+rule above means every flex and grid container already declares one. Confirm that before
+zeroing: if any layout relies on the inherited 24px, it will collapse.
+
+Fix it in `theme.json`, not with a CSS override. A CSS-only fix leaves the site editor
+still showing 24px gaps the front end doesn't have, which is exactly the editor-lying
+problem the hybrid rule exists to prevent.
+
 **`[SET]` Styling is hybrid: tokens native, layout in CSS.** Decided by Alison,
 20 July 2026.
 
