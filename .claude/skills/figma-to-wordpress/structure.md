@@ -227,6 +227,16 @@ It must be:
 Not a theme activation hook — that runs once, is awkward to re-run, and does nothing at all
 on a site that already exists.
 
+**`[SET]` Slash serialized block content before `wp_insert_post`/`wp_update_post`.** Both
+run `wp_unslash()` on their input, so block markup must be passed through `wp_slash()`
+first. WordPress escapes a literal `--` inside block-comment JSON as `--` (it is
+illegal inside an HTML comment); without slashing, `wp_unslash` strips the backslashes and
+the escape renders as the literal text `u002du002d` in the output. On Dama Charter this
+silently broke `wp:read-more`'s `button--ghost` class — the class became
+`buttonu002du002dghost`, so neither its CSS nor a class-keyed render filter matched it, and
+only dynamic blocks showed it (a static block's class sits in its saved HTML body, which
+has no `--` escape). It is invisible until something keys on the mangled class.
+
 ### Templates
 
 **`[SET]` Templates and template parts ship as theme files** (`templates/*.html`,
@@ -412,6 +422,31 @@ expire after about 7 days.
 `theme.json` `fontFace`. Do not hotlink Google Fonts — clients are often in the EU.
 
 **`[SET]` Never author an icon by hand.** Use the exported asset.
+
+**`[SET]` An icon that belongs *inside* a core block's text (e.g. a button chevron) is
+injected as a real inline element, not drawn with a masked pseudo-element.** Decided by
+Alison, 21 July 2026. Core's RichText won't hold the asset, so the temptation is a
+`::after { mask: url(icon.svg) }` — but a masked pseudo-element renders unreliably. Instead,
+add it at render with a `render_block_core/<block>` filter (keyed on the design className,
+e.g. `button--ghost`), placed just after the visible label. This keeps the block's editable
+content plain text while putting an actual element in the flow.
+
+**Handle both file types the design may use inside a button:**
+
+- **An SVG is inlined** so it can `fill: currentColor` (override the export's hardcoded
+  fill), so one asset works on every ground — a ghost button appears on white and on blue —
+  and is sized to the asset's own ratio so a `preserveAspectRatio="none"` export is not
+  distorted.
+- **A raster image is an `<img>` served from the media library** (§7: sideloaded, earning
+  srcset), never hotlinked from the theme, sized to the label height.
+
+Drive it from a `class => file` map and branch on the file extension, so a button can carry
+either. Then, for both:
+
+- **Keep it beside the text.** The anchor is an `inline-flex` with `align-items: center`
+  (vertical centring) and `justify-content: flex-start`, so the icon follows the label and
+  never drifts to the far edge when the label wraps to a second line. For `wp:read-more`,
+  insert the icon before its hidden screen-reader span so it directly follows the label.
 
 **`[SET]` Social icons come from the design, never a brand style guide.** Decided by
 Alison, 21 July 2026. Core's Social Icons block (`core/social-links`) ships each platform's
