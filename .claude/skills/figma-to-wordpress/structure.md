@@ -423,6 +423,15 @@ expire after about 7 days.
 
 **`[SET]` Never author an icon by hand.** Use the exported asset.
 
+**`[SET]` Export the icon from the *instance*, not the component default.** A component
+often ships a placeholder glyph (Relume's library uses a small cube) that each instance
+overrides with the real icon. Exporting the component node gives you the placeholder; you
+have to export the overridden node inside the instance. On Dama Charter the ghost-button
+"chevron" was the cube placeholder for the whole build — the real icon is a thin `>` that
+only appears on the instance's own vector node. Confirm the exported glyph matches the
+screenshot before trusting it, and size the icon to the design's **slot** (e.g. a 24px
+frame holding a ~7×12 glyph), not just the glyph's own bounds, or the spacing is wrong.
+
 **`[SET]` An icon that belongs *inside* a core block's text (e.g. a button chevron) is
 injected as a real inline element, not drawn with a masked pseudo-element.** Decided by
 Alison, 21 July 2026. Core's RichText won't hold the asset, so the temptation is a
