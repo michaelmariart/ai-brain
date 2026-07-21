@@ -83,9 +83,24 @@ options:
 
 Record the answer, because it is a per-project decision rather than a house default.
 
-**`[ASK]` Which templates should a site always ship?** Dama Charter has only
-`front-page.html` and `index.html`. Is there a standard set — `page`, `single`, `archive`,
-`404`, `search` — that every build should include even when the design doesn't show them?
+**`[SET]` A multi-page site needs `templates/page.html`.** Learned on Dama Charter,
+21 July 2026. Without it a regular page falls through the template hierarchy to
+`index.html` — which on this theme is the blog query loop — so the page renders the post
+list instead of its own content. `page.html` is the same shape as `front-page.html`
+(header part → `main` with `wp:post-content` → footer part). The front page alone can get
+away with only `front-page.html` + `index.html`; the moment a second page exists, add
+`page.html`.
+
+**`[ASK]` What other templates should a site ship?** Beyond `front-page`, `index` and
+`page`, is there a standard set — `single`, `archive`, `404`, `search` — that every build
+should include even when the design doesn't show them?
+
+**`[SET]` Reuse a section pattern across pages when the content is identical.** On Dama
+Charter the "Amalfi Coast Boat Tours" page's tour cards and FAQ are the same Figma component
+instances, with the same copy, as the home page's — so its importer definition lists the
+existing `tours` and `faq` section patterns and only its hero is a new pattern. Give a page
+its own pattern only where its content actually differs. Because content lives per-page in
+the database, a later edit to one page's copy does not touch the other.
 
 ### Naming
 
@@ -236,6 +251,14 @@ silently broke `wp:read-more`'s `button--ghost` class — the class became
 `buttonu002du002dghost`, so neither its CSS nor a class-keyed render filter matched it, and
 only dynamic blocks showed it (a static block's class sits in its saved HTML body, which
 has no `--` escape). It is invisible until something keys on the mangled class.
+
+**`[SET]` Clear the theme's pattern cache at the start of the importer.** A theme caches
+its `patterns/*.php` list — in a DB transient when there is no persistent object cache —
+keyed on the theme version, so a pattern file added since the last cache write stays
+invisible and the import fails with "Pattern … is not registered". Call
+`wp_get_theme()->cache_delete()` then `_register_theme_block_patterns()` before importing,
+so a freshly-added section pattern is always picked up. Bumping the theme version would also
+do it, but clearing the cache is the honest fix.
 
 ### Templates
 
