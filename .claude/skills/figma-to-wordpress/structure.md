@@ -288,12 +288,31 @@ from the design verbatim — the *link* is ours to add.
 
 ## 4. Navigation
 
-**`[SET]` Nav markup comes from the design**, not from `wp_nav_menu()`, when the design's
-navbar has custom structure (dropdowns, a CTA button in the bar).
+**`[SET]` The header nav is an editable WordPress menu — a `wp_navigation` post — not links
+hardcoded in the pattern.** Decided by Alison, 21 July 2026. The importer creates the menu
+(idempotent, like the pages; mark it with post meta so a re-run finds it after a rename),
+and the navbar pattern references it by id, so the client edits it in the Site Editor
+(Appearance → Editor → Navigation) and edits persist in the database.
 
-**`[ASK]` Should the nav be wired to a real WordPress menu** so the client can edit it, and
-if so how do the design's dropdowns and button map onto menu items? Dama Charter's nav
-links are hardcoded anchors to on-page sections.
+- **Look the id up at render, don't bake it in.** The `wp_navigation` id is per-install, so
+  the pattern (a PHP file) reads it at generation time rather than hardcoding one.
+- **Keep the items inline as a fallback.** Render the same links inline until the menu post
+  exists, from a single `nav_menu_markup()` used for both the post and the fallback, so the
+  bar is never empty on a fresh install and the definition is not duplicated.
+- **Clear the pattern cache after creating the menu**, or the navbar keeps serving the
+  cached inline fallback instead of the ref (see §3's pattern-cache rule).
+
+**`[SET]` One responsive menu covers desktop and mobile.** A block theme's navigation block
+is responsive (`overlayMenu`): the same menu renders inline on the desktop bar and as a
+hamburger overlay on small screens. There are not two menus to build or keep in sync.
+
+**`[SET]` The design's custom structure survives the move to a menu.** Dropdowns map to
+`navigation-submenu`; a CTA button in the bar (Dama Charter's "Book A Tour") stays a static
+button in the pattern, **not** a menu item, because a styled button is not a nav link.
+
+**`[SET]` Cross-page section links are absolute (`/#section`).** On a multi-page site an
+on-page anchor (`#faq`) resolves only on the page that has that section; `/#faq` reaches the
+home section from anywhere.
 
 ---
 
