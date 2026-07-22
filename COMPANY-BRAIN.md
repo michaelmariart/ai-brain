@@ -50,27 +50,31 @@ are read straight from the share, so there is only ever one copy of client infor
 
 ## Setting it up
 
-Run once, pointing at the share:
+The sync scripts are the studio's **canonical copies on the share** (in the company brain
+folder) — they are not duplicated in this repo, so run them from there. Run once, pointing
+at the share:
 
 ```powershell
 # Windows
-.\Sync-CompanyBrain.ps1 -Path "\\server\share\CompanyBrain"
+& "Z:\AI BRAIN\Sync-CompanyBrain.ps1" -Path "Z:\AI BRAIN"
 ```
 ```bash
 # macOS / Linux
-./sync-company-brain.sh --path "/Volumes/Share/CompanyBrain"
+"/Volumes/Clients_Folder/AI BRAIN/sync-company-brain.sh" --path "/Volumes/Clients_Folder/AI BRAIN"
 ```
 
-The location is remembered, so afterwards you just run it with no arguments.
+The location is remembered, so afterwards you just run the script with no arguments.
 
 | Task | Windows | macOS / Linux |
 |---|---|---|
-| Sync / pick up company updates | `.\Sync-CompanyBrain.ps1` | `./sync-company-brain.sh` |
-| See what's synced | `.\Sync-CompanyBrain.ps1 -Status` | `./sync-company-brain.sh --status` |
-| Remove company items | `.\Sync-CompanyBrain.ps1 -Remove` | `./sync-company-brain.sh --remove` |
-| Point at a new location | `.\Sync-CompanyBrain.ps1 -Path "…"` | `./sync-company-brain.sh --path "…"` |
+| Sync / pick up company updates | `& "Z:\AI BRAIN\Sync-CompanyBrain.ps1"` | `"…/AI BRAIN/sync-company-brain.sh"` |
+| See what's synced | `& "Z:\AI BRAIN\Sync-CompanyBrain.ps1" -Status` | `"…/AI BRAIN/sync-company-brain.sh" --status` |
+| Remove company items | `& "Z:\AI BRAIN\Sync-CompanyBrain.ps1" -Remove` | `"…/AI BRAIN/sync-company-brain.sh" --remove` |
+| Point at a new location | `& "Z:\AI BRAIN\Sync-CompanyBrain.ps1" -Path "…"` | `"…/AI BRAIN/sync-company-brain.sh" --path "…"` |
 
-Re-run the sync whenever the company brain has been updated.
+Re-run the sync whenever the company brain has been updated. Better still, set up automatic
+syncing (a `SessionStart` hook that runs the share's `Auto-Sync` wrapper) so every session
+starts current — see `MACHINE SETUP CHECKLIST.md` in the company brain.
 
 ## How your own work is protected
 

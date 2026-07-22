@@ -207,10 +207,65 @@ is enough to stop.
 (the "getting content into the database" rule above), and it must run **before** the pages
 so the Query Loop has posts to show on the first pass.
 
+### Categorised content types (reviews, FAQs, and the like)
+
+**`[SET]` Recurring, curated content the client categorises is a custom post type, surfaced
+through a category-filtered block.** Decided by Alison, 23 July 2026.
+
+Some repeated sections are neither bespoke copy nor a feed of an existing type. They are a
+*set of small, like items the client curates* — reviews/testimonials, FAQs, team members,
+services, tour options. The design repeats one card or row for each. Model each such set as
+its **own custom post type**, not as repeated blocks in a page and not as a Query Loop of
+`post` (that rule is for an existing core type shown newest-first; this is curated content
+with its own fields and order).
+
+- **One field per thing the card shows.** The post title, the editor body, and a small meta
+  field for anything else (a reviewer's role/location line, say — a registered meta with a
+  meta box, so it is a real field, not a loose custom field). Nothing the design shows may
+  live only in a PHP file (§3's absolute rule).
+- **Not publicly queryable.** These have no single-view pages of their own; they exist to be
+  pulled into a page by the block. Keep `show_in_rest` on so the editor and the category
+  dropdown work.
+
+**`[SET]` Each type gets its own category taxonomy, and the category *is* placement.**
+Decided by Alison, 23 July 2026. A separate taxonomy per post type — reviews categorised
+independently of FAQs — so each admin screen shows only its own list of categories and the
+two never mix. The category means **where** a set is placed: a "Home Page" category renders
+on the home page, an "About" category on the about page. Each type carries its own "Home
+Page" term (a reviews "Home Page" is a distinct term from an FAQs "Home Page"); create the
+terms the design's placement implies. The blocks still take a category *slug*, so the same
+`home-page` value reads correctly against whichever taxonomy the block belongs to.
+
+**`[SET]` Surface each type through a custom block with a category chooser; blank shows all.**
+The block has one setting — a dropdown of the taxonomy's terms, with an "All categories"
+option. Choosing a term filters the list to it; leaving it blank shows every entry. So a
+client places a set by dropping the block and picking a category, with no code.
+
+- **Store the term *slug*, not its id.** Term ids are per-install; a slug (`home-page`) is
+  stable, so a pattern that seeds the block with a category survives a re-import on a fresh
+  database.
+- **The block renders the design's exact markup** from the post data (the testimonial grid,
+  the accordion), so the section looks identical to the hardcoded original — the content has
+  simply moved into editable posts. It is a dynamic block: a PHP render callback owns the
+  output, and the editor previews it live with `ServerSideRender`, so front end and editor
+  never drift.
+- **Order is the client's.** Query by `menu_order` so the admin's drag-to-reorder (seeded
+  from the design's order) is what renders, not post date.
+
+**Seed the entries, exactly like the blog posts.** Same create-if-missing-by-slug importer
+contract (above): one post per card the design shows, content verbatim, tagged with the
+placement category, `menu_order` set to the design's order. Where the design leaves a body
+empty (an FAQ with only a question), seed it empty rather than invent copy — it renders as
+the design's own "awaiting copy" state.
+
 ### Custom blocks
 
-**`[SET]` Custom blocks live in the theme**, at `blocks/<block-name>/`. Decided by Alison,
-20 July 2026.
+**`[SET]` Custom blocks live in the theme**, not in a separate plugin — authored in
+`src/<block-name>/` and compiled to `build/<block-name>/`. Decided by Alison, 20 July 2026;
+the path was settled to the `@wordpress/scripts` default (`src/` → `build/`, the standard
+create-block layout) when the first blocks were built, 23 July 2026, so the two block rules
+agree. A single `src/index.js` can register several blocks into one `build/index.js` bundle,
+enqueued once as a shared editor-script handle that each block's `block.json` names.
 
 > **Known trade-off, accepted deliberately.** Page content in the database will reference
 > these blocks, so switching or removing the theme leaves that content rendering as block

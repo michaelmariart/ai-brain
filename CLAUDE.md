@@ -54,8 +54,10 @@ Skills and agents come from two places:
 - **Local** — this workspace's `.claude/skills` and `.claude/agents`. Yours, tracked in this
   repo, and only active here.
 - **Company** — shared skills and agents synced from the company share into your user-level
-  `~/.claude/`, so they apply in every project. Sync with `Sync-CompanyBrain.ps1` (Windows)
-  or `sync-company-brain.sh` (macOS/Linux). On a name clash the **local** version wins.
+  `~/.claude/`, so they apply in every project. The sync scripts are the studio's canonical
+  copies **on the share**, not in this repo — run `Z:\AI BRAIN\Sync-CompanyBrain.ps1`
+  (Windows) or `"AI BRAIN/sync-company-brain.sh"` (macOS/Linux). On a name clash the
+  **local** version wins.
 - **Client data** (`clients/`) and **requirements** (`requirements/`) live on the company
   share and are **read in place**. Never copy client data into a project folder, and never
   commit it to a Git repo.
