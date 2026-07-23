@@ -95,12 +95,45 @@ away with only `front-page.html` + `index.html`; the moment a second page exists
 `page`, is there a standard set — `single`, `archive`, `404`, `search` — that every build
 should include even when the design doesn't show them?
 
+**`[SET]` A "blog landing" / "article" design is a set of templates plus a posts page, not
+one-off pages.** Decided on the July 2026 build. When the design gives an example blog
+listing and an example article, build `templates/home.html` (the posts index), an
+`archive.html` (category/tag/date, with a `wp:query-title`/`wp:term-description`) and a
+`single.html`, and create an empty page flagged as the posts page (`page_for_posts`) so
+`/blog` resolves. The card grid is a Query Loop factored into one pattern
+(`blog-loop`) that the index and archive templates both reference with
+`<!-- wp:pattern {"slug":"…/blog-loop"} /-->`, so the loop is defined once. Seed a handful of
+posts (verbatim card copy, placeholder bodies) exactly as §3's blog rule requires.
+
 **`[SET]` Reuse a section pattern across pages when the content is identical.** On Dama
 Charter the "Amalfi Coast Boat Tours" page's tour cards and FAQ are the same Figma component
 instances, with the same copy, as the home page's — so its importer definition lists the
 existing `tours` and `faq` section patterns and only its hero is a new pattern. Give a page
 its own pattern only where its content actually differs. Because content lives per-page in
-the database, a later edit to one page's copy does not touch the other.
+the database, a later edit to one page's copy does not touch the other. (The July 2026
+multi-page build reused this heavily: the five tour pages each list the shared
+`gallery`/`boat`/`testimonials`/`captain`/`faq`/`contact`/`blog` patterns verbatim and add
+only a per-tour header and overview.)
+
+**`[SET]` A generic component reused on many pages with only per-page text/image is seeded
+from an importer helper, not one boilerplate pattern per page.** Decided on the July 2026
+build. The page header (a title over a full-bleed image) appears on eight pages with a
+different title and photo each; shipping eight near-identical `patterns/*.php` files would be
+noise. Instead a page definition's `sections` array may hold an *inline spec* — an array
+`['type' => 'page-header', 'title' => …, 'image' => …, 'alt' => …]` alongside the usual
+pattern-slug strings — and `page_content()` dispatches arrays to a `page_header_markup()`
+helper that emits the block markup. The seeded copy still lands editable in the database, so
+§3 holds; this only avoids per-page duplication of one component's chrome. Reserve it for a
+component that is genuinely the same everywhere bar a field or two — bespoke long-form
+sections (each tour's overview) still get their own pattern.
+
+**`[SET]` When a page needs a component *without* one of its sub-elements, make a named
+variant pattern, don't fork the markup inline.** The Contact page's header already carries
+the "Book a Tour" title, so its enquiry section drops the heading (`contact-page`, vs the
+heading-carrying `contact` used everywhere else); the Reviews page shows the testimonial grid
+with no "Read more" button (`reviews-all`, vs `testimonials`). Each variant is a small
+pattern with a comment saying what it drops and why, so the difference is discoverable rather
+than hidden in a page definition.
 
 ### Naming
 
@@ -357,6 +390,15 @@ and the navbar pattern references it by id, so the client edits it in the Site E
 - **Clear the pattern cache after creating the menu**, or the navbar keeps serving the
   cached inline fallback instead of the ref (see §3's pattern-cache rule).
 
+**`[SET]` The menu is created once, then client-owned; a later structural change is a
+deliberate migration, not an every-import overwrite.** Decided on the July 2026 build. The
+importer keeps `ensure_primary_menu()` (create-if-missing) so a routine re-import never
+clobbers the client's Site-Editor edits — there is no edit-detection on the menu the way
+there is on pages. When the theme's own menu definition genuinely changes (new pages, a
+restructured dropdown), expose that as a separate `sync_primary_menu()` that rewrites the
+existing post in place (same id, so the navbar's ref keeps resolving) and run it once as a
+migration. Don't wire it into the default import path.
+
 **`[SET]` One responsive menu covers desktop and mobile.** A block theme's navigation block
 is responsive (`overlayMenu`): the same menu renders inline on the desktop bar and as a
 hamburger overlay on small screens. There are not two menus to build or keep in sync.
@@ -368,6 +410,14 @@ button in the pattern, **not** a menu item, because a styled button is not a nav
 **`[SET]` Cross-page section links are absolute (`/#section`).** On a multi-page site an
 on-page anchor (`#faq`) resolves only on the page that has that section; `/#faq` reaches the
 home section from anywhere.
+
+**`[SET]` Once a dedicated page exists, CTAs point at the page, not the home-page section.**
+On the July 2026 build the single-page site's `#contact` anchors became links to the real
+`/contact-us` page: every "book", "booking", "make a booking", "enquire" and "inquire" button
+(including the navbar's "Book A Tour") now targets the contact page. Apply the same to the
+other listings — a testimonials "Read more" goes to `/reviews`, a blog "View all" to `/blog`.
+Because the sections are still seeded per page, the change is made once in each pattern and
+the importer rewrites the live pages; footer link lists get the same real destinations.
 
 ---
 
@@ -593,6 +643,15 @@ therefore unexportable, and two genuine client photographs that had simply been 
 
 So an asset reported as `unknown` is **not** necessarily unavailable. Check `rawImages`
 before telling anyone a file is missing.
+
+**`[SET]` A node whose image is a designer placeholder returns the same tiny byte-identical
+export every time — treat those as "no image supplied", reuse an existing real photo, and
+flag it.** On the July 2026 build four page headers (Full-day Amalfi, Reviews, FAQs, Contact)
+came back as an identical 313×191 PNG from both `get_design_context` and `download_assets`'
+`rawImages` — the designer never set a photo. `md5` the recovered files: when several are
+identical (and trivially small) they are the placeholder, not content. Don't ship the grey
+placeholder and don't invent a photo; reuse the best-fitting real image already in the theme
+and tell the client those slots await final images.
 
 **`[SET]` Check whether the raw sources are actually larger before re-exporting.** Compare
 the raw images against what you already have — hash them, and measure the pixel dimensions.
