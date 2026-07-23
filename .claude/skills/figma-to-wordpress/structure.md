@@ -685,6 +685,14 @@ Rules for the importer:
   Without both, WordPress will not generate `srcset` and the exercise is wasted.
 - **The site logo becomes an attachment too**, set via the `site_logo` option, so
   `wp:site-logo` resolves.
+- **Down-res on sideload.** Cap the longest edge at 2048px and re-encode JPEGs at ~75–80%
+  quality as the file enters the media library (PNGs kept lossless, resized only if over
+  the cap) — the workspace image standard (`CLAUDE.md`). WordPress's own big-image
+  threshold (`big_image_size_threshold`, 2560px) is *higher* than the 2048 cap, so the
+  importer enforces it, not core; guard the resize on an available image editor (GD), and
+  regenerate thumbnails after the originals change so `srcset` and metadata match. The
+  Figma exports and the theme's `assets/images/` are prepared to the same standard, so a
+  fresh import stays lean from the first run.
 
 **`[SET]` Raster images go to the library; vectors and decorative assets stay in the theme.**
 Decided by Alison, 20 July 2026.

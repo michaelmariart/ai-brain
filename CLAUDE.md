@@ -69,6 +69,23 @@ Skills and agents come from two places:
 - **Verify before declaring done** — open the page/app and check it actually works.
 - Ask before anything hard to undo (deleting files, publishing, sending).
 - Explain trade-offs briefly; don't over-explain routine work.
+- **Optimise images on the way in** (see below).
+
+## 2a. Images
+
+Applies to **all** projects in this workspace, WordPress or plain web:
+
+- **Cap every raster at 2048px** on its longest edge — down-res on import/save, never
+  ship a 4000px original to fill a small slot.
+- **JPEG and other lossy formats (lossy WebP/AVIF) save at ~70–80% quality** — 80% is the
+  ceiling; drop toward 70% for large or secondary images.
+- **PNG/SVG and other lossless formats keep their format and standard quality** — resize a
+  PNG only if it breaches the 2048px cap; never re-encode it lossy.
+- **Unless a task explicitly needs otherwise** (a print asset, an archive source, a hero
+  that genuinely needs more), in which case follow the task.
+
+For WordPress, the importer down-reses on sideload rather than after the fact — see the
+figma-to-wordpress skill (§7).
 
 ## 3. Git
 
