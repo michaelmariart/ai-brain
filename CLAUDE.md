@@ -101,5 +101,11 @@ figma-to-wordpress skill (§7).
 
 - Commit only when asked. Make **small, logical commits** with clear, imperative messages
   ("Add contact form validation", not "stuff").
+- **Bring the README up to date before every commit.** Any `README.md` the change
+  affects — new files in a structure list, new features, changed behaviour, a
+  setting someone has to fill in — is updated *in the same commit* as the code,
+  not left for a follow-up. Documentation that lags the code is worse than none,
+  because it is trusted. Check each repo the commit touches, not just the obvious
+  one. Verify what the README claims still matches the code rather than assuming.
 - Never commit secrets, dependencies (`vendor/`, `node_modules/`), or build artefacts.
 - `projects/` is intentionally ignored — see [PROJECTS.md](PROJECTS.md).
