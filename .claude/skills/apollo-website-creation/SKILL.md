@@ -9,6 +9,9 @@ description: >-
   <client>", "new aged-care site". Links the Local site into the workspace,
   forces the WordPress database prefix to wp_ in both wp-config.php and the
   database, and scaffolds an empty child theme wired to its own GitHub repo.
+  Also covers carrying custom blocks over from the previous client's child
+  theme and de-branding them — constants, block titles in the database, text
+  domain and CSS class names.
 ---
 
 # Apollo website creation
@@ -138,7 +141,17 @@ git ls-remote https://github.com/mariartau/theme-<client>.git
 Exit 0 with no refs means the repo exists and is empty — safe to push. A failure means
 it doesn't exist: **ask the user to create it**, don't try to create it yourself.
 
-### 5. Verify before declaring done
+### 5. Carry blocks over from the donor theme (when asked)
+
+A cloned site's previous child theme often holds custom blocks worth reusing. Copying
+the files is the easy part; the client's name is baked into four separate places and
+missing any one of them leaves a block that looks fine and isn't.
+
+The full checklist is in [carry-over-blocks.md](carry-over-blocks.md). The headline:
+**copy verbatim first and verify the copy, then de-brand deliberately** — never
+hand-retype a block while copying it.
+
+### 6. Verify before declaring done
 
 All four, through WordPress rather than by eyeballing the database:
 
@@ -158,4 +171,4 @@ see [local-wp-cli.md](local-wp-cli.md).
 ## What this skill does not do
 
 Building pages, templates and blocks from the design is **`figma-to-wordpress`**. Start
-it only once step 5 passes; building on a broken prefix wastes the whole build.
+it only once step 6 passes; building on a broken prefix wastes the whole build.
