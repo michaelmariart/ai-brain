@@ -1,0 +1,11 @@
+# Normalise line endings so the theme is identical on every machine and server.
+* text=auto eol=lf
+
+# Treat these as binary (never touch line endings).
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.png   binary
+*.jpg   binary
+*.ico   binary
