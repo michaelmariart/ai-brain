@@ -30,11 +30,14 @@ Primary stack: **HTML, CSS, JavaScript, PHP** (mostly small websites and holding
 
 - All hands-on work lives in **`projects/`** (one entry per project). This folder is
   Git-ignored — see [PROJECTS.md](PROJECTS.md).
-- A project under `projects/` may be a real subfolder **or a link** (a Windows junction, or
-  a symlink on macOS) to a folder elsewhere on the machine — managed by `Set-Project.ps1`
-  (Windows) or `set-project.sh` (macOS/Linux). When a project is linked in (e.g. the Mariart
-  plugin), treat it as living at its real location — match that codebase's existing
-  conventions and preserve its line endings.
+- `projects/<name>` is a **real local folder** — the project's own README, notes and
+  working documents live there. When the code itself lives elsewhere on the machine, that
+  folder is linked in **inside** the project as `files` (a Windows junction, or a symlink
+  on macOS), so the project folder stays local and the working files stay remote. Some
+  older projects are instead mounted whole, with `projects/<name>` itself the link —
+  managed by `Set-Project.ps1` (Windows) or `set-project.sh` (macOS/Linux). Either way,
+  treat linked-in code (e.g. the Mariart plugin) as living at its real location — match
+  that codebase's existing conventions and preserve its line endings.
 - Each project is **self-contained**: its own `index` entry point, `assets/` for
   images/fonts/SVG, and a short `README.md`.
 - Use **relative paths** inside a project (`assets/logo.svg`), never absolute local paths
